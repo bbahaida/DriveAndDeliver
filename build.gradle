@@ -59,16 +59,8 @@ bootJar {
     mainClass = 'net.bmbsolutions.driveanddeliver.DriveAndDeliverApplication'
 }
 //jib {
-//    from {
-//        image = 'openjdk:alpine'
-//    }
 //    to {
 //        image = 'bbahaida/driveanddeliver'
-//    }
-//    container {
-//        jvmFlags = ['-Xms512m', '-Xdebug']
-//        mainClass = 'net.bmbsolutions.driveanddeliver.DriveAndDeliverApplication'
-//        labels = [maintainer: 'Brahim Bahaida']
 //    }
 //}
 
@@ -94,7 +86,7 @@ openApiGenerate {
 
     ]
     packageName = "net.bmbsolutions.driveanddeliver"
-    modelPackage = "net.bmbsolutions.driveanddeliver.model"
+    modelPackage = "net.bmbsolutions.driveanddeliver.model.dto"
     apiPackage = "net.bmbsolutions.driveanddeliver.api"
 }
 
