@@ -1,0 +1,109 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.1'
+    id 'io.spring.dependency-management' version '1.1.5'
+    id "com.google.cloud.tools.jib" version "3.4.3"
+    id "org.openapi.generator" version "7.5.0"
+}
+
+group = 'net.bmbsolutions'
+version = '0.0.1-SNAPSHOT'
+def mapstructVersion = "1.5.5.Final"
+def jjwtVersion = "0.11.5"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    implementation 'io.swagger:swagger-annotations:1.6.3'  // Assuming you still need swagger-annotations
+    implementation("jakarta.validation:jakarta.validation-api:3.0.2")
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.1'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    implementation "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    implementation "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+bootJar {
+    mainClass = 'net.bmbsolutions.driveanddeliver.DriveAndDeliverApplication'
+}
+jib {
+    from {
+        image = 'openjdk:alpine'
+    }
+    to {
+        image = 'bbahaida/driveanddeliver'
+    }
+    container {
+        jvmFlags = ['-Xms512m', '-Xdebug']
+        mainClass = 'net.bmbsolutions.driveanddeliver.DriveAndDeliverApplication'
+        labels = [maintainer: 'Brahim Bahaida']
+    }
+}
+
+openApiGenerate {
+    generatorName = 'spring'
+    inputSpec.set("$rootDir/specs/api.yaml")
+    generateApiTests.set(false)
+    globalProperties.set([
+            invokerPackage: "",
+    ])
+    configOptions = [
+            'delegatePattern': "false",
+            "dateLibrary": "java8-localdatetime",
+            "useSpringBoot3": "true",
+            "documentationProvider": "none",
+            "gradleBuildFile": "false",
+            skipDefaultInterface: 'true',
+            skipDeprecatedEnum: 'true',
+            generateModelTests: 'false',
+            generateApiTests: 'false',
+            withXml: 'false',
+            interfaceOnly: 'true'
+
+    ]
+    packageName = "net.bmbsolutions.driveanddeliver"
+    modelPackage = "net.bmbsolutions.driveanddeliver.model"
+    apiPackage = "net.bmbsolutions.driveanddeliver.api"
+}
+
+//sourceSets {
+//    main {
+//        java {
+//            srcDirs = ["src/main/java",
+//                       "${buildDir}/generate-resources/main/src/main/java/net/bmbsolutions/driveanddeliver"]
+//        }
+//    }
+//}
+// tasks.compileJava.dependsOn(tasks.openApiGenerate)

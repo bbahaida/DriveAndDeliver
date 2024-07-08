@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: DriveAndDeliver API
+  version: 1.0.0
+  description: API for a delivery service allowing customers to choose delivery methods and book time slots.
+
+servers:
+  - url: http://localhost:8080/api
+
+paths:
+  /delivery-methods:
+    get:
+      summary: Get all delivery methods
+      tags:
+        - Delivery Methods
+      responses:
+        '200':
+          description: A list of delivery methods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeliveryMethodDTO'
+        '500':
+          description: Server error
+
+  /bookings/time-slots:
+    get:
+      summary: Get available time slots for a delivery method
+      tags:
+        - Time Slots
+      parameters:
+        - in: query
+          name: deliveryMethodId
+          schema:
+            type: integer
+          required: true
+          description: The ID of the delivery method
+      responses:
+        '200':
+          description: A list of available time slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeSlotDTO'
+        '400':
+          description: Invalid delivery method ID
+        '500':
+          description: Server error
+
+  /bookings:
+    post:
+      summary: Book a time slot
+      tags:
+        - Bookings
+      requestBody:
+        description: Booking request payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequestDTO'
+      responses:
+        '200':
+          description: Booking successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponseDTO'
+        '400':
+          description: Invalid request
+        '500':
+          description: Server error
+  /authenticate:
+    post:
+      summary: Authenticate user and return JWT
+      tags:
+        - Authentication
+      requestBody:
+        description: Authentication request payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequestDTO'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponseDTO'
+        '401':
+          description: Authentication failed
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    DeliveryMethodDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier of the delivery method
+        methodName:
+          type: string
+          description: Name of the delivery method
+
+    TimeSlotDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier of the time slot
+        startTime:
+          type: string
+          format: date-time
+          description: Start time of the time slot
+        endTime:
+          type: string
+          format: date-time
+          description: End time of the time slot
+        deliveryMethodId:
+          type: integer
+          description: Identifier of the associated delivery method
+        isBooked:
+          type: boolean
+          description: Indicates if the time slot is booked
+
+    BookingRequestDTO:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          description: Unique identifier of the customer
+        timeSlotId:
+          type: integer
+          description: Unique identifier of the time slot to be booked
+
+    BookingResponseDTO:
+      type: object
+      properties:
+        bookingId:
+          type: integer
+          description: Unique identifier of the booking
+        customer:
+          $ref: '#/components/schemas/CustomerDTO'
+        timeSlot:
+          $ref: '#/components/schemas/TimeSlotDTO'
+
+    CustomerDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier of the customer
+        name:
+          type: string
+          description: Name of the customer
+    AuthRequestDTO:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Username of the user
+        password:
+          type: string
+          description: Password of the user
+    AuthResponseDTO:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token
