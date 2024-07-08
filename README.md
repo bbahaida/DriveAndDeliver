@@ -245,17 +245,8 @@ The build process for the DriveAndDeliver application involves using Gradle and 
    }
 
    jib {
-       from {
-           image = 'openjdk:21-alpine'
-       }
        to {
            image = 'bbahaida/driveanddeliver:latest'
-       }
-       container {
-           jvmFlags = ['-Xms512m', '-Xdebug']
-           mainClass = 'net.bmbsolutions.driveanddeliver.DriveAndDeliverApplication'
-           ports = ['8080']
-           labels = [maintainer: 'Brahim Bahaida']
        }
    }
    ```
